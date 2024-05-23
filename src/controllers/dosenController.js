@@ -28,7 +28,7 @@ exports.getAllDosen = (req, res) => {
 exports.insertDosen = (req, res) => {
   const { NIP, Nama, JenisKelamin, Email } = req.body;
   const sqlQuery = `
-    INSERT INTO Dosen (NIP, Nama, JenisKelamin) VALUES (?, ?, ?, ?);
+    INSERT INTO Dosen (NIP, Nama, JenisKelamin) VALUES (?, ?, ?);
   `;
 
   database.query(sqlQuery, [NIP, Nama, JenisKelamin], (err, result) => {
@@ -235,5 +235,3 @@ exports.getAllDosenPenguji = (req, res) => {
     }
   });
 };
-
-

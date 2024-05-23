@@ -101,44 +101,6 @@ exports.getAllMahasiswaP = (req, res) => {
   });
 };
 
-// Add new mahasiswa and pendaftaran
-exports.addMahasiswaP = (req, res) => {
-  const {
-    tanggal,
-    nama,
-    nim,
-    email,
-    judul,
-    calonPembimbing1,
-    calonPembimbing2,
-    kategoriTA
-  } = req.body;
-
-  const insertMahasiswaQuery = `
-    INSERT INTO Mahasiswa (NIM, Nama, Email) VALUES (?, ?, ?);
-  `;
-
-  const insertPendaftaranQuery = `
-    INSERT INTO Pendaftaran (NIM, Judul_TA, KategoriTA, nip_pembimbing1, nip_pembimbing2) VALUES (?, ?, ?, ?, ?);
-  `;
-
-  database.query(insertMahasiswaQuery, [nim, nama, email], (err, result) => {
-    if (err) {
-      console.error('Error adding mahasiswa:', err);
-      res.status(500).json({ error: 'Internal server error' });
-    } else {
-      database.query(insertPendaftaranQuery, [nim, judul, kategoriTA, calonPembimbing1, calonPembimbing2], (err, result) => {
-        if (err) {
-          console.error('Error adding pendaftaran:', err);
-          res.status(500).json({ error: 'Internal server error' });
-        } else {
-          res.status(200).json({ message: 'Data added successfully' });
-        }
-      });
-    }
-  });
-};
-
 // Update the status of a specific mahasiswa by NIM
 exports.updateMahasiswaPStatus = (req, res) => {
   const nim = req.params.nim;
@@ -161,5 +123,63 @@ exports.updateMahasiswaPStatus = (req, res) => {
         res.status(404).json({ error: 'Mahasiswa not found' });
       }
     }
+  });
+};
+exports.addPendaftaran = (req, res) => {
+  const {
+    id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1,
+    nip_pembimbing2, nip_penguji1, nip_penguji2, status
+  } = req.body;
+
+  // Query untuk memeriksa apakah mahasiswa dengan NIM yang diberikan sudah ada
+  const checkMahasiswaQuery = `SELECT * FROM Mahasiswa WHERE NIM = ?`;
+
+  // Melakukan query untuk memeriksa keberadaan mahasiswa
+  database.query(checkMahasiswaQuery, [NIM], (err, results) => {
+    if (err) {
+      console.error('Error checking mahasiswa:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    // Jika mahasiswa tidak ditemukan, kembalikan respons dengan pesan error
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Mahasiswa not found' });
+    }
+
+    // Jika mahasiswa ditemukan, lanjutkan dengan menambahkan pendaftaran
+    database.beginTransaction(err => {
+      if (err) {
+        console.error('Error starting transaction:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      // Query untuk menambahkan pendaftaran
+      const insertPendaftaranQuery = `
+        INSERT INTO Pendaftaran (id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      // Melakukan query untuk menambahkan pendaftaran
+      database.query(insertPendaftaranQuery, [id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status || 'menunggu'], (err, results) => {
+        if (err) {
+          console.error('Error inserting pendaftaran:', err);
+          // Rollback transaksi jika terjadi kesalahan
+          return database.rollback(() => {
+            console.error('Rollback transaction due to error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+          });
+        }
+
+        // Commit transaksi jika operasi berhasil
+        database.commit(err => {
+          if (err) {
+            console.error('Error committing transaction:', err);
+            res.status(500).json({ error: 'Internal server error' });
+          } else {
+            res.status(201).json({ success: true, message: 'Pendaftaran added successfully' });
+          }
+        });
+      });
+    });
   });
 };

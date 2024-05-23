@@ -16,7 +16,7 @@ exports.getAllMahasiswa = (req, res) => {
 
 // Get mahasiswa by NIM
 exports.getMahasiswaByNIM = (req, res) => {
-  const nim = req.query.nim;
+  const nim = req.params.nim;
   const sqlQuery = `SELECT * FROM Mahasiswa WHERE NIM = ?`;
 
   database.query(sqlQuery, [nim], (err, results) => {

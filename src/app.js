@@ -4,6 +4,7 @@ const path = require('path');
 
 const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
 const dosenRoutes = require('./routes/dosenRoutes');
+const pendaftaranRoutes = require('./routes/pendaftaranRoutes');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api/mahasiswa', mahasiswaRoutes);
 app.use('/api/dosen', dosenRoutes);
+app.use('/api/pendaftaran', pendaftaranRoutes)
 
 app.use(express.static(path.join(__dirname, '../dist')));
 

@@ -1,5 +1,91 @@
 const database = require('../config/mysql');
 
+
+// Get all dosen
+exports.getAllDosen = (req, res) => {
+  const sqlQuery = `
+    SELECT NIP, Nama, JenisKelamin FROM Dosen
+  `;
+
+  database.query(sqlQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching dosen:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      if (results.length > 0) {
+        res.json(results);
+      } else {
+        res.status(404).json({ error: 'Dosen not found' });
+      }
+    }
+  });
+};
+
+
+
+
+// Insert new dosen
+exports.insertDosen = (req, res) => {
+  const { NIP, Nama, JenisKelamin, Email } = req.body;
+  const sqlQuery = `
+    INSERT INTO Dosen (NIP, Nama, JenisKelamin) VALUES (?, ?, ?, ?);
+  `;
+
+  database.query(sqlQuery, [NIP, Nama, JenisKelamin], (err, result) => {
+    if (err) {
+      console.error('Error inserting dosen:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json({ message: 'Dosen inserted successfully' });
+    }
+  });
+};
+
+// Update dosen by NIP
+exports.updateDosenByNIP = (req, res) => {
+  const nip = req.params.nip;
+  const { Nama, JenisKelamin, Email } = req.body;
+  const sqlQuery = `
+    UPDATE Dosen SET Nama = ?, JenisKelamin = ? WHERE NIP = ?;
+  `;
+
+  database.query(sqlQuery, [Nama, JenisKelamin, nip], (err, result) => {
+    if (err) {
+      console.error('Error updating dosen:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      if (result.affectedRows > 0) {
+        res.json({ message: 'Dosen updated successfully' });
+      } else {
+        res.status(404).json({ error: 'Dosen not found' });
+      }
+    }
+  });
+};
+
+// Delete dosen by NIP
+exports.deleteDosenByNIP = (req, res) => {
+  const nip = req.params.nip;
+  const sqlQuery = `
+    DELETE FROM Dosen WHERE NIP = ?;
+  `;
+
+  database.query(sqlQuery, [nip], (err, result) => {
+    if (err) {
+      console.error('Error deleting dosen:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      if (result.affectedRows > 0) {
+        res.json({ message: 'Dosen deleted successfully' });
+      } else {
+        res.status(404).json({ error: 'Dosen not found' });
+      }
+    }
+  });
+};
+
+
+
 // Get mahasiswa mentored by a specific dosen
 exports.getMahasiswaByDosen = (req, res) => {
   const nipPembimbing = req.params.nip_pembimbing;
@@ -149,3 +235,5 @@ exports.getAllDosenPenguji = (req, res) => {
     }
   });
 };
+
+

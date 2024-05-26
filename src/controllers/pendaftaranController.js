@@ -29,7 +29,7 @@ exports.getMahasiswaP = (req, res) => {
   const nim = req.params.nim;
   const sqlQuery = `
     SELECT 
-      CURDATE() AS tanggal,
+      ADDDATE('2024-06-15', INTERVAL 10 DAY) AS tanggal,
       m.Nama AS nama, 
       p.NIM AS nim, 
       m.Email AS email, 

@@ -4,15 +4,15 @@ const mahasiswaController = require('../controllers/mahasiswaController');
 
 
 // Route to get all mahasiswa
-router.get('/allmahasiswa', mahasiswaController.getAllMahasiswa);
+router.get('/mahasiswa', mahasiswaController.getAllMahasiswa);
 
 // Route to get mahasiswa by NIM
-router.get('/bynim/:nim', mahasiswaController.getMahasiswaByNIM);
+router.get('/mahasiswa/:nim', mahasiswaController.getMahasiswaByNIM);
 
 // Route to insert mahasiswa
-router.post('/addmahasiswa', mahasiswaController.addMahasiswa);
+router.post('/mahasiswa', mahasiswaController.addMahasiswa);
 
 // Route to update mahasiswa by NIM
-router.post('/updatemahasiswabynim/:nim', mahasiswaController.updateMahasiswaByNIM);
+router.post('/mahasiswa/:nim', mahasiswaController.updateMahasiswaByNIM);
 
 module.exports = router;

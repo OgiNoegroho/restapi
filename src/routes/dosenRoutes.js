@@ -3,14 +3,18 @@ const router = express.Router();
 const dosenController = require('../controllers/dosenController');
 
 // New routes for additional functionalities
-router.get('/alldosen', dosenController.getAllDosen);
-router.post('/insertdosen', dosenController.insertDosen);
-router.put('/updatedosen/:nip', dosenController.updateDosenByNIP);
-router.delete('/deletedosen/:nip', dosenController.deleteDosenByNIP);
+router.get('/dosen', dosenController.getAllDosen);
+router.get('/dosen', dosenController.getMahasiswaPDosen);
+router.post('/dosen', dosenController.insertDosen);
+router.put('/dosen/:nip', dosenController.updateDosenByNIP);
+router.delete('/dosen/:nip', dosenController.deleteDosenByNIP);
 // Existing routes
-router.get('/pembimbing/:nip_pembimbing', dosenController.getMahasiswaByDosen);
-router.get('/pembimbing', dosenController.getAllDosenPembimbing);
-router.get('/penguji/:nip_penguji', dosenController.getMahasiswaByPenguji);
-router.get('/penguji', dosenController.getAllDosenPenguji);
+router.get('/dosen/pembimbing/:nip_pembimbing', dosenController.getMahasiswaByDosen);
+router.get('/dosen/pembimbing', dosenController.getAllDosenPembimbing);
+router.get('/dosen/penguji/:nip_penguji', dosenController.getMahasiswaByPenguji);
+router.get('/dosen/penguji', dosenController.getAllDosenPenguji);
+
+
+
 
 module.exports = router;

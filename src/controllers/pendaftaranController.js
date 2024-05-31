@@ -1,28 +1,6 @@
 const database = require('../config/mysql');
 
-// Get all dosen names with optional exclusion
-exports.getMahasiswaPDosen = (req, res) => {
-  const pembimbing1NIP = req.query.pembimbing1NIP;
 
-  let sqlQuery;
-  let params = [];
-
-  if (pembimbing1NIP) {
-    sqlQuery = `SELECT NIP, Nama AS nama_dosen FROM Dosen WHERE NIP != ?;`;
-    params = [pembimbing1NIP];
-  } else {
-    sqlQuery = `SELECT NIP, Nama AS nama_dosen FROM Dosen;`;
-  }
-
-  database.query(sqlQuery, params, (err, results) => {
-    if (err) {
-      console.error('Error fetching dosen list:', err);
-      res.status(500).json({ error: 'Internal server error' });
-    } else {
-      res.json({ dosenList: results });
-    }
-  });
-};
 
 // Get details of a specific mahasiswa by NIM
 exports.getMahasiswaP = (req, res) => {

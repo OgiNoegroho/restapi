@@ -1,27 +1,27 @@
-var mysql = require("mysql");
+const mysql = require('mysql');
+require('dotenv').config();
 
-var hostname = "2bj.h.filess.io";
-var database = "dummydata_excitedfox";
-var port = "3307";
-var username = "dummydata_excitedfox";
-var password = "2eb7e4375de8860e8cafe340a18bb61ad382d91d";
+const hostname = process.env.DB_HOST;
+const database = process.env.DB_DATABASE;
+const port = process.env.DB_PORT;
+const username = process.env.DB_USER;
+const password = process.env.DB_PASSWORD;
 
-var database = mysql.createConnection({
+const db = mysql.createConnection({
   host: hostname,
   user: username,
-  password,
-  database,
-  port,
+  password: password,
+  database: database,
+  port: port,
 });
 
-database.connect(function (err) {
+db.connect(function (err) {
   if (err) throw err;
-  console.log("Connected!");
+  console.log('Connected!');
 });
 
-database.query("SELECT 1+1").on("result", function (row) {
+db.query('SELECT 1+1').on('result', function (row) {
   console.log(row);
 });
 
-
-module.exports = database;
+module.exports = db;

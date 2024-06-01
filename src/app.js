@@ -23,7 +23,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
+// Remove app.listen()
 
-app.listen( () => {
-  console.log(`Server is running on port`);
-});
+module.exports = app; // Export the app for serverless deployment

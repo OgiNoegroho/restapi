@@ -6,18 +6,15 @@ const JWT_SECRET = 'isadyaudsay283u1heaaSADSJAB';
 exports.register = (req, res) => {
     const { email, password } = req.body;
 
-    // Check if the email already exists in the database
     User.findByEmail(email, (err, existingUser) => {
         if (err) {
             if (err.kind === "not_found") {
-                // Hash the password before storing it
                 bcrypt.hash(password, 10, (err, hashedPassword) => {
                     if (err) {
                         console.error("Error hashing password:", err);
                         return res.status(500).send({ message: "Error hashing password." });
                     }
 
-                    // If the email does not exist, proceed with registration
                     const newUser = {
                         email: email,
                         password: hashedPassword
@@ -56,11 +53,11 @@ exports.login = (req, res) => {
             return res.status(404).send({ message: "User not found." });
         }
 
-        if (password !== user.password) { // Ganti bcrypt dengan perbandingan biasa
+        if (password !== user.password) {
             return res.status(401).send({ message: "Invalid Password!" });
         }
 
-        // Create token with user's email and password
+       
         const tokenPayload = {
             id: user.id,
             email: user.email,
@@ -68,14 +65,14 @@ exports.login = (req, res) => {
         };
 
         const tokenOptions = {
-            expiresIn: 86400 // 24 hours
+            expiresIn: 86400 
         };
 
         const token = jwt.sign(tokenPayload, JWT_SECRET, tokenOptions);
 
-        // Send token and user info as response
+
         res.status(200).send({
-            message: "Login successfully", // Tambahkan pesan sukses login
+            message: "Login successfully",
             id: user.id,
             email: user.email,
             token: token
@@ -83,9 +80,9 @@ exports.login = (req, res) => {
     });
 };
 
-// Protected route handler
+
 exports.protectedRoute = (req, res) => {
-    res.status(200).send({ // Tambahkan handler rute terlindungi
+    res.status(200).send({
         message: "Access granted",
         userId: req.userId,
         email: req.email,

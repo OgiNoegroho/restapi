@@ -14,7 +14,7 @@ const authmiddleware = (req, res, next) => {
         }
         req.userId = decoded.id;
         req.email = decoded.email;
-        req.password = decoded.password; // Tambahkan password ke request object
+        req.password = decoded.password;
         next();
     });
 };

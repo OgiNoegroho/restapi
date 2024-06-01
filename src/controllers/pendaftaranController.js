@@ -1,8 +1,5 @@
 const database = require('../config/mysql');
 
-
-
-// Get details of a specific mahasiswa by NIM
 exports.getMahasiswaP = (req, res) => {
   const nim = req.params.nim;
   const sqlQuery = `
@@ -44,7 +41,6 @@ exports.getMahasiswaP = (req, res) => {
   });
 };
 
-// Get all mahasiswa
 exports.getAllMahasiswaP = (req, res) => {
   const sqlQuery = `
     SELECT 
@@ -79,7 +75,6 @@ exports.getAllMahasiswaP = (req, res) => {
   });
 };
 
-// Update the status of a specific mahasiswa by NIM
 exports.updateMahasiswaPStatus = (req, res) => {
   const nim = req.params.nim;
   const { status } = req.body;
@@ -109,46 +104,39 @@ exports.addPendaftaran = (req, res) => {
     nip_pembimbing2, nip_penguji1, nip_penguji2, status
   } = req.body;
 
-  // Query untuk memeriksa apakah mahasiswa dengan NIM yang diberikan sudah ada
   const checkMahasiswaQuery = `SELECT * FROM Mahasiswa WHERE NIM = ?`;
 
-  // Melakukan query untuk memeriksa keberadaan mahasiswa
   database.query(checkMahasiswaQuery, [NIM], (err, results) => {
     if (err) {
       console.error('Error checking mahasiswa:', err);
       return res.status(500).json({ error: 'Internal server error' });
     }
 
-    // Jika mahasiswa tidak ditemukan, kembalikan respons dengan pesan error
     if (results.length === 0) {
       return res.status(404).json({ error: 'Mahasiswa not found' });
     }
 
-    // Jika mahasiswa ditemukan, lanjutkan dengan menambahkan pendaftaran
     database.beginTransaction(err => {
       if (err) {
         console.error('Error starting transaction:', err);
         return res.status(500).json({ error: 'Internal server error' });
       }
 
-      // Query untuk menambahkan pendaftaran
       const insertPendaftaranQuery = `
         INSERT INTO Pendaftaran (id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      // Melakukan query untuk menambahkan pendaftaran
       database.query(insertPendaftaranQuery, [id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status || 'menunggu'], (err, results) => {
         if (err) {
           console.error('Error inserting pendaftaran:', err);
-          // Rollback transaksi jika terjadi kesalahan
+
           return database.rollback(() => {
             console.error('Rollback transaction due to error:', err);
             res.status(500).json({ error: 'Internal server error' });
           });
         }
 
-        // Commit transaksi jika operasi berhasil
         database.commit(err => {
           if (err) {
             console.error('Error committing transaction:', err);

@@ -6,8 +6,6 @@ const authmiddleware = require('../middlewares/authmiddleware'); // Tambahkan mi
 
 router.post('/register', userController.register);
 router.post('/login', userController.login);
-
-// Protected route
-router.get('/protected', authmiddleware, userController.protectedRoute); // Tambahkan rute terlindungi
+router.get('/protected', authmiddleware, userController.protectedRoute);
 
 module.exports = router;

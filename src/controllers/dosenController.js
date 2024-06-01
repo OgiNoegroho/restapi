@@ -1,7 +1,5 @@
 const database = require('../config/mysql');
 
-
-// Get all dosen
 exports.getAllDosen = (req, res) => {
   const sqlQuery = `
     SELECT NIP, Nama, JenisKelamin FROM Dosen
@@ -21,8 +19,6 @@ exports.getAllDosen = (req, res) => {
   });
 };
 
-
-// Get all dosen names with optional exclusion
 exports.getMahasiswaPDosen = (req, res) => {
   const pembimbing1NIP = req.query.pembimbing1NIP;
 
@@ -46,7 +42,6 @@ exports.getMahasiswaPDosen = (req, res) => {
   });
 };
 
-// Insert new dosen
 exports.insertDosen = (req, res) => {
   const { NIP, Nama, JenisKelamin, Email } = req.body;
   const sqlQuery = `
@@ -63,7 +58,6 @@ exports.insertDosen = (req, res) => {
   });
 };
 
-// Update dosen by NIP
 exports.updateDosenByNIP = (req, res) => {
   const nip = req.params.nip;
   const { Nama, JenisKelamin, Email } = req.body;
@@ -85,7 +79,6 @@ exports.updateDosenByNIP = (req, res) => {
   });
 };
 
-// Delete dosen by NIP
 exports.deleteDosenByNIP = (req, res) => {
   const nip = req.params.nip;
   const sqlQuery = `
@@ -106,9 +99,6 @@ exports.deleteDosenByNIP = (req, res) => {
   });
 };
 
-
-
-// Get mahasiswa mentored by a specific dosen
 exports.getMahasiswaByDosen = (req, res) => {
   const nipPembimbing = req.params.nip_pembimbing;
   const sqlQuery = `
@@ -151,7 +141,6 @@ exports.getMahasiswaByDosen = (req, res) => {
   });
 };
 
-// Get all dosen pembimbing
 exports.getAllDosenPembimbing = (req, res) => {
   const sqlQuery = `
     SELECT DISTINCT 
@@ -183,7 +172,6 @@ exports.getAllDosenPembimbing = (req, res) => {
   });
 };
 
-// Get mahasiswa examined by a specific dosen
 exports.getMahasiswaByPenguji = (req, res) => {
   const nippenguji = req.params.nip_penguji;
   const sqlQuery = `
@@ -226,7 +214,6 @@ exports.getMahasiswaByPenguji = (req, res) => {
   });
 };
 
-// Get all dosen penguji
 exports.getAllDosenPenguji = (req, res) => {
   const sqlQuery = `
     SELECT DISTINCT 

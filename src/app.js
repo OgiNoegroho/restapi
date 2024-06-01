@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api/', mahasiswaRoutes);
 app.use('/api/', dosenRoutes);
 app.use('/api/', pendaftaranRoutes);
-app.use('/api/user', userRoutes);
+app.use('/api/user', userRoutes); // Tambahkan rute user
 
 app.use(express.static(path.join(__dirname, '../dist')));
 
@@ -23,5 +23,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
-// Export handler function for serverless deployment
-module.exports = app;
+const PORT = 3001;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

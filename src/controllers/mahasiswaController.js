@@ -1,6 +1,5 @@
 const database = require('../config/mysql');
 
-// Get all mahasiswa
 exports.getAllMahasiswa = (req, res) => {
   const sqlQuery = `SELECT * FROM Mahasiswa`;
 
@@ -14,7 +13,6 @@ exports.getAllMahasiswa = (req, res) => {
   });
 };
 
-// Get mahasiswa by NIM
 exports.getMahasiswaByNIM = (req, res) => {
   const nim = req.params.nim;
   const sqlQuery = `SELECT * FROM Mahasiswa WHERE NIM = ?`;
@@ -33,7 +31,6 @@ exports.getMahasiswaByNIM = (req, res) => {
   });
 };
 
-// Add mahasiswa
 exports.addMahasiswa = (req, res) => {
   const { nim, nama, email, jenisKelamin } = req.body;
   const sqlQuery = `INSERT INTO Mahasiswa (NIM, Nama, Email, JenisKelamin) VALUES (?, ?, ?, ?)`;
@@ -48,7 +45,6 @@ exports.addMahasiswa = (req, res) => {
   });
 };
 
-// Update mahasiswa by NIM
 exports.updateMahasiswaByNIM = (req, res) => {
   const nim = req.params.nim;
   const { nama, email, jenisKelamin } = req.body;

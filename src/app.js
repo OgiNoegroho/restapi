@@ -20,7 +20,7 @@ app.use('/api/', pendaftaranRoutes);
 app.use('/api/user', userRoutes); // Ensure user route is under /api/user
 
 // Root route for API
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the API!' });
 });
 

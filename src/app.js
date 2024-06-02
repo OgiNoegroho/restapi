@@ -14,9 +14,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use('/api/mahasiswa', mahasiswaRoutes);
-app.use('/api/dosen', dosenRoutes);
-app.use('/api/pendaftaran', pendaftaranRoutes);
+app.use('/api/', mahasiswaRoutes);
+app.use('/api/', dosenRoutes);
+app.use('/api/', pendaftaranRoutes);
 app.use('/api/user', userRoutes); // Ensure user route is under /api/user
 
 // Root route for API

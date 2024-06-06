@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/usermodel');
-const bcrypt = require ('bcryptjs');
+const bcrypt = require('bcryptjs');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -13,7 +13,7 @@ exports.register = (req, res) => {
                 bcrypt.hash(password, 10, (err, hashedPassword) => {
                     if (err) {
                         console.error("Error hashing password:", err);
-                        return res.status(500).send({ message: "Error hashing password." });
+                        return res.status(500).send({ success: false, message: "Error hashing password." });
                     }
 
                     const newUser = {
@@ -24,19 +24,19 @@ exports.register = (req, res) => {
                     User.create(newUser, (err, data) => {
                         if (err) {
                             console.error("Error registering user:", err);
-                            return res.status(500).send({ message: "Error registering user." });
+                            return res.status(500).send({ success: false, message: "Error registering user." });
                         }
                         console.log("User registered successfully:", data);
-                        res.status(201).send({ message: "User registered successfully!" });
+                        res.status(201).send({ success: true, message: "User registered successfully!" });
                     });
                 });
             } else {
                 console.error("Error checking email:", err);
-                return res.status(500).send({ message: "Error checking email." });
+                return res.status(500).send({ success: false, message: "Error checking email." });
             }
         } else {
             console.log("Email already exists:", email);
-            return res.status(400).send({ message: "Email already exists!" });
+            return res.status(400).send({ success: false, message: "Email already exists!" });
         }
     });
 };
@@ -47,39 +47,45 @@ exports.login = (req, res) => {
     User.findByEmail(email, (err, user) => {
         if (err) {
             console.error("Error finding user:", err);
-            return res.status(500).send({ message: "Error finding user." });
+            return res.status(500).send({ success: false, message: "Error finding user." });
         }
 
         if (!user) {
-            return res.status(404).send({ message: "User not found." });
+            return res.status(404).send({ success: false, message: "User not found." });
         }
 
-        if (password !== user.password) {
-            return res.status(401).send({ message: "Invalid Password!" });
-        }
+        bcrypt.compare(password, user.password, (err, result) => {
+            if (err) {
+                console.error("Error comparing passwords:", err);
+                return res.status(500).send({ success: false, message: "Error comparing passwords." });
+            }
 
-       
-        const tokenPayload = {
-            id: user.id,
-            email: user.email,
-            password: user.password
-        };
+            if (!result) {
+                return res.status(401).send({ success: false, message: "Invalid Password!" });
+            }
 
-        const tokenOptions = {
-            expiresIn: 86400 
-        };
+            const tokenPayload = {
+                id: user.id,
+                email: user.email
+            };
 
-        const token = jwt.sign(tokenPayload, JWT_SECRET, tokenOptions);
+            const tokenOptions = {
+                expiresIn: 86400 // 24 hours
+            };
 
+            const token = jwt.sign(tokenPayload, JWT_SECRET, tokenOptions);
 
-        res.status(200).send({
-            message: "Login successfully",
-            id: user.id,
-            email: user.email,
-            token: token
+            res.status(200).send({
+                success: true,
+                message: "Login successfully",
+                id: user.id,
+                email: user.email,
+                token: token
+            });
         });
     });
 };
+
 
 
 exports.protectedRoute = (req, res) => {

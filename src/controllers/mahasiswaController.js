@@ -1,8 +1,7 @@
 const database = require('../config/mysql');
 
 exports.getAllMahasiswa = (req, res) => {
-  const sqlQuery = `SELECT * FROM Mahasiswa`;
-
+  const sqlQuery = 'SELECT * FROM Mahasiswa';
   database.query(sqlQuery, (err, results) => {
     if (err) {
       console.error('Error fetching mahasiswa:', err);
@@ -15,8 +14,7 @@ exports.getAllMahasiswa = (req, res) => {
 
 exports.getMahasiswaByNIM = (req, res) => {
   const nim = req.params.nim;
-  const sqlQuery = `SELECT * FROM Mahasiswa WHERE NIM = ?`;
-
+  const sqlQuery = 'SELECT * FROM Mahasiswa WHERE NIM = ?';
   database.query(sqlQuery, [nim], (err, results) => {
     if (err) {
       console.error('Error fetching mahasiswa by NIM:', err);
@@ -33,8 +31,7 @@ exports.getMahasiswaByNIM = (req, res) => {
 
 exports.addMahasiswa = (req, res) => {
   const { nim, nama, email, jenisKelamin } = req.body;
-  const sqlQuery = `INSERT INTO Mahasiswa (NIM, Nama, Email, JenisKelamin) VALUES (?, ?, ?, ?)`;
-
+  const sqlQuery = 'INSERT INTO Mahasiswa (NIM, Nama, Email, JenisKelamin) VALUES (?, ?, ?, ?)';
   database.query(sqlQuery, [nim, nama, email, jenisKelamin], (err, results) => {
     if (err) {
       console.error('Error inserting mahasiswa:', err);
@@ -48,8 +45,7 @@ exports.addMahasiswa = (req, res) => {
 exports.updateMahasiswaByNIM = (req, res) => {
   const nim = req.params.nim;
   const { nama, email, jenisKelamin } = req.body;
-  const sqlQuery = `UPDATE Mahasiswa SET Nama = ?, Email = ?, JenisKelamin = ? WHERE NIM = ?`;
-
+  const sqlQuery = 'UPDATE Mahasiswa SET Nama = ?, Email = ?, JenisKelamin = ? WHERE NIM = ?';
   database.query(sqlQuery, [nama, email, jenisKelamin, nim], (err, results) => {
     if (err) {
       console.error('Error updating mahasiswa:', err);

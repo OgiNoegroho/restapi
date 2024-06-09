@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 
 const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
 const dosenRoutes = require('./routes/dosenRoutes');
@@ -12,6 +13,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/', mahasiswaRoutes);
 app.use('/api/', dosenRoutes);

@@ -98,6 +98,7 @@ exports.updateMahasiswaPStatus = (req, res) => {
     }
   });
 };
+
 exports.addPendaftaran = (req, res) => {
   const {
     id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1,
@@ -147,5 +148,37 @@ exports.addPendaftaran = (req, res) => {
         });
       });
     });
+  });
+};
+
+
+exports.updatePenguji = (req, res) => {
+  const nim = req.params.nim;
+  const { nip_penguji1, nip_penguji2 } = req.body;
+
+  console.log('Received NIM:', nim);
+  console.log('Received nip_penguji1:', nip_penguji1);
+  console.log('Received nip_penguji2:', nip_penguji2);
+
+  if (!nim) {
+    return res.status(400).json({ error: 'NIM is missing' });
+  }
+
+  const sqlQuery = `
+    UPDATE Pendaftaran
+    SET nip_penguji1 = ?, nip_penguji2 = ?
+    WHERE NIM = ?;
+  `;
+
+  database.query(sqlQuery, [nip_penguji1, nip_penguji2, nim], (err, result) => {
+    if (err) {
+      console.error('Error updating penguji:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    if (result.affectedRows > 0) {
+      res.json({ message: 'Penguji updated successfully' });
+    } else {
+      res.status(404).json({ error: 'Mahasiswa not found' });
+    }
   });
 };

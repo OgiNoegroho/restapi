@@ -24,6 +24,74 @@ const User = {
             }
             result({ kind: "not_found" }, null);
         });
+    },
+    createProfile: (userId, profile, result) => {
+        const { name, nip, age, birthplace, birthdate, address, gender, profile_pic } = profile;
+        db.query(
+            "INSERT INTO user_profiles SET user_id = ?, name = ?, nip = ?, age = ?, birthplace = ?, birthdate = ?, address = ?, gender = ?, profile_pic = ?",
+            [userId, name, nip, age, birthplace, birthdate, address, gender, profile_pic],
+            (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    result(err, null);
+                    return;
+                }
+                result(null, { user_id: userId, ...profile });
+            }
+        );
+    },
+    findProfileByUserId: (userId, result) => {
+        db.query("SELECT * FROM user_profiles WHERE user_id = ?", [userId], (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                result(err, null);
+                return;
+            }
+            if (res.length) {
+                result(null, res[0]);
+                return;
+            }
+            result({ kind: "not_found" }, null);
+        });
+    },
+    updateProfile: (userId, profile, result) => {
+        const { name, nip, age, birthplace, birthdate, address, gender } = profile;
+        db.query(
+            "UPDATE user_profiles SET name = ?, nip = ?, age = ?, birthplace = ?, birthdate = ?, address = ?, gender = ? WHERE user_id = ?",
+            [name, nip, age, birthplace, birthdate, address, gender, userId],
+            (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    result(err, null);
+                    return;
+                }
+                if (res.affectedRows == 0) {
+                    // not found
+                    result({ kind: "not_found" }, null);
+                    return;
+                }
+                result(null, { user_id: userId, ...profile });
+            }
+        );
+    },
+    updateProfilePicture: (userId, profile_pic, result) => {
+        db.query(
+            "UPDATE user_profiles SET profile_pic = ? WHERE user_id = ?",
+            [profile_pic, userId],
+            (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    result(err, null);
+                    return;
+                }
+                if (res.affectedRows == 0) {
+                    // not found
+                    result({ kind: "not_found" }, null);
+                    return;
+                }
+                result(null, { user_id: userId, profile_pic: profile_pic });
+            }
+        );
     }
 };
 

@@ -5,39 +5,61 @@ const bcrypt = require('bcryptjs');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, name, nip, age, birthplace, birthdate, address, gender, profile_pic } = req.body;
 
     User.findByEmail(email, (err, existingUser) => {
-        if (err) {
-            if (err.kind === "not_found") {
-                bcrypt.hash(password, 10, (err, hashedPassword) => {
-                    if (err) {
-                        console.error("Error hashing password:", err);
-                        return res.status(500).send({ success: false, message: "Error hashing password." });
-                    }
+        if (err && err.kind !== "not_found") {
+            console.error("Error checking email:", err);
+            return res.status(500).send({ success: false, message: "Error checking email." });
+        }
 
-                    const newUser = {
-                        email: email,
-                        password: hashedPassword
-                    };
-
-                    User.create(newUser, (err, data) => {
-                        if (err) {
-                            console.error("Error registering user:", err);
-                            return res.status(500).send({ success: false, message: "Error registering user." });
-                        }
-                        console.log("User registered successfully:", data);
-                        res.status(201).send({ success: true, message: "User registered successfully!" });
-                    });
-                });
-            } else {
-                console.error("Error checking email:", err);
-                return res.status(500).send({ success: false, message: "Error checking email." });
-            }
-        } else {
-            console.log("Email already exists:", email);
+        if (existingUser) {
             return res.status(400).send({ success: false, message: "Email already exists!" });
         }
+
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+                console.error("Error hashing password:", err);
+                return res.status(500).send({ success: false, message: "Error hashing password." });
+            }
+
+            const newUser = {
+                email: email,
+                password: hashedPassword
+            };
+
+            User.create(newUser, (err, userData) => {
+                if (err) {
+                    console.error("Error registering user:", err);
+                    return res.status(500).send({ success: false, message: "Error registering user." });
+                }
+
+                const newProfile = {
+                    name,
+                    nip,
+                    age,
+                    birthplace,
+                    birthdate,
+                    address,
+                    gender,
+                    profile_pic
+                };
+
+                User.createProfile(userData.id, newProfile, (err, profileData) => {
+                    if (err) {
+                        console.error("Error creating profile:", err);
+                        return res.status(500).send({ success: false, message: "Error creating profile." });
+                    }
+
+                    res.status(201).send({
+                        success: true,
+                        message: "User registered successfully!",
+                        user: userData,
+                        profile: profileData
+                    });
+                });
+            });
+        });
     });
 };
 
@@ -86,13 +108,81 @@ exports.login = (req, res) => {
     });
 };
 
+exports.getProfile = (req, res) => {
+    const userId = req.userId;
 
+    User.findProfileByUserId(userId, (err, profile) => {
+        if (err) {
+            console.error("Error fetching profile:", err);
+            return res.status(500).send({ success: false, message: "Error fetching profile." });
+        }
+
+        if (!profile) {
+            return res.status(404).send({ success: false, message: "Profile not found." });
+        }
+
+        res.status(200).send(profile);
+    });
+};
+
+exports.updateProfile = (req, res) => {
+    const userId = req.userId;
+    const { name, nip, age, birthplace, birthdate, address, gender } = req.body;
+
+    const updatedProfile = {
+        name,
+        nip,
+        age,
+        birthplace,
+        birthdate,
+        address,
+        gender
+    };
+
+    User.updateProfile(userId, updatedProfile, (err, profileData) => {
+        if (err) {
+            console.error("Error updating profile:", err);
+            return res.status(500).send({ success: false, message: "Error updating profile." });
+        }
+
+        if (!profileData) {
+            return res.status(404).send({ success: false, message: "Profile not found." });
+        }
+
+        res.status(200).send({
+            success: true,
+            message: "Profile updated successfully",
+            profile: profileData
+        });
+    });
+};
+
+exports.updateProfilePicture = (req, res) => {
+    const userId = req.userId;
+    const { profile_pic } = req.body;
+
+    User.updateProfilePicture(userId, profile_pic, (err, updatedProfile) => {
+        if (err) {
+            console.error("Error updating profile picture:", err);
+            return res.status(500).send({ success: false, message: "Error updating profile picture." });
+        }
+
+        if (!updatedProfile) {
+            return res.status(404).send({ success: false, message: "Profile not found." });
+        }
+
+        res.status(200).send({
+            success: true,
+            message: "Profile picture updated successfully",
+            profile: updatedProfile
+        });
+    });
+};
 
 exports.protectedRoute = (req, res) => {
     res.status(200).send({
         message: "Access granted",
         userId: req.userId,
-        email: req.email,
-        password: req.password
+        email: req.email
     });
 };

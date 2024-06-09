@@ -12,11 +12,11 @@ const authmiddleware = (req, res, next) => {
 
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
         if (err) {
+            console.error("Error verifying token:", err);
             return res.status(401).send({ message: "Unauthorized!" });
         }
         req.userId = decoded.id;
         req.email = decoded.email;
-        req.password = decoded.password;
         next();
     });
 };

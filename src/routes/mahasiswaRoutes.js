@@ -5,6 +5,6 @@ const mahasiswaController = require('../controllers/mahasiswaController');
 router.get('/mahasiswa', mahasiswaController.getAllMahasiswa);
 router.get('/mahasiswa/:nim', mahasiswaController.getMahasiswaByNIM);
 router.post('/mahasiswa', mahasiswaController.addMahasiswa);
-router.put('/mahasiswa/:nim', mahasiswaController.updateMahasiswaByNIM);  // Changed to PUT for updating
+router.put('/mahasiswa/:nim', mahasiswaController.updateMahasiswaByNIM);
 
 module.exports = router;

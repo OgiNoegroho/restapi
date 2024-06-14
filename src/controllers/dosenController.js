@@ -19,6 +19,23 @@ exports.getAllDosen = (req, res) => {
   });
 };
 
+exports.getDosenWithoutNIP = (req, res) => {
+  const excludedNIP = req.params.nip;
+
+  const sqlQuery = `SELECT NIP, Nama, JenisKelamin FROM Dosen WHERE NIP != ?`;
+
+  database.query(sqlQuery, [excludedNIP], (err, results) => {
+    if (err) {
+      console.error('Error fetching dosen:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.json(results);
+    }
+  });
+};
+
+
+
 exports.getMahasiswaPDosen = (req, res) => {
   const pembimbing1NIP = req.query.pembimbing1NIP;
 

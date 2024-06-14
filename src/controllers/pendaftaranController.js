@@ -4,7 +4,7 @@ exports.getMahasiswaP = (req, res) => {
   const nim = req.params.nim;
   const sqlQuery = `
     SELECT 
-      ADDDATE('2024-06-15', INTERVAL 10 DAY) AS tanggal,
+      p.created_at AS tanggal,
       m.Nama AS nama, 
       p.NIM AS nim, 
       m.Email AS email, 
@@ -33,6 +33,8 @@ exports.getMahasiswaP = (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     } else {
       if (result.length > 0) {
+        // Format the date
+        result[0].tanggal = new Date(result[0].tanggal).toISOString().split('T')[0];
         res.json(result[0]);
       } else {
         res.status(404).json({ error: 'Mahasiswa not found' });
@@ -41,10 +43,11 @@ exports.getMahasiswaP = (req, res) => {
   });
 };
 
+
 exports.getAllMahasiswaP = (req, res) => {
   const sqlQuery = `
     SELECT 
-      ADDDATE('2024-06-15', INTERVAL 10 DAY) AS tanggal,
+      p.created_at AS tanggal,
       m.Nama AS nama, 
       p.NIM AS nim, 
       m.Email AS email, 
@@ -70,14 +73,24 @@ exports.getAllMahasiswaP = (req, res) => {
       console.error('Error fetching mahasiswa list:', err);
       res.status(500).json({ error: 'Internal server error' });
     } else {
+      // Format the dates
+      results.forEach(result => {
+        result.tanggal = new Date(result.tanggal).toISOString().split('T')[0];
+      });
       res.json(results);
     }
   });
 };
 
+
+
 exports.updateMahasiswaPStatus = (req, res) => {
   const nim = req.params.nim;
   const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ error: 'Status is required' });
+  }
 
   const sqlQuery = `
     UPDATE Pendaftaran
@@ -101,9 +114,13 @@ exports.updateMahasiswaPStatus = (req, res) => {
 
 exports.addPendaftaran = (req, res) => {
   const {
-    id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1,
+    NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1,
     nip_pembimbing2, nip_penguji1, nip_penguji2, status
   } = req.body;
+
+  if (!NIM || !Judul_TA || !KategoriTA || !JenisTA || !nip_pembimbing1 || !nip_pembimbing2) {
+    return res.status(400).json({ error: 'All fields except Penguji are required' });
+  }
 
   const checkMahasiswaQuery = `SELECT * FROM Mahasiswa WHERE NIM = ?`;
 
@@ -124,11 +141,14 @@ exports.addPendaftaran = (req, res) => {
       }
 
       const insertPendaftaranQuery = `
-        INSERT INTO Pendaftaran (id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO Pendaftaran (NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `;
 
-      database.query(insertPendaftaranQuery, [id_pendaftaran, NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, nip_penguji1, nip_penguji2, status || 'menunggu'], (err, results) => {
+      const penguji1 = nip_penguji1 || null;
+      const penguji2 = nip_penguji2 || null;
+
+      database.query(insertPendaftaranQuery, [NIM, Judul_TA, KategoriTA, JenisTA, nip_pembimbing1, nip_pembimbing2, penguji1, penguji2, status || 'menunggu'], (err, results) => {
         if (err) {
           console.error('Error inserting pendaftaran:', err);
 
@@ -141,15 +161,20 @@ exports.addPendaftaran = (req, res) => {
         database.commit(err => {
           if (err) {
             console.error('Error committing transaction:', err);
-            res.status(500).json({ error: 'Internal server error' });
-          } else {
-            res.status(201).json({ success: true, message: 'Pendaftaran added successfully' });
+
+            return database.rollback(() => {
+              console.error('Rollback transaction due to error:', err);
+              res.status(500).json({ error: 'Internal server error' });
+            });
           }
+
+          res.status(201).json({ success: true, message: 'Pendaftaran added successfully' });
         });
       });
     });
   });
 };
+
 
 
 exports.updatePenguji = (req, res) => {
@@ -160,8 +185,8 @@ exports.updatePenguji = (req, res) => {
   console.log('Received nip_penguji1:', nip_penguji1);
   console.log('Received nip_penguji2:', nip_penguji2);
 
-  if (!nim) {
-    return res.status(400).json({ error: 'NIM is missing' });
+  if (!nim || !nip_penguji1 || !nip_penguji2) {
+    return res.status(400).json({ error: 'NIM, nip_penguji1, and nip_penguji2 are required' });
   }
 
   const sqlQuery = `

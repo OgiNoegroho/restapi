@@ -7,7 +7,6 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.get('/profile', authMiddleware, userController.getProfile);
 router.put('/profile', authMiddleware, userController.updateProfile);
-router.put('/profile/picture', authMiddleware, userController.updateProfilePicture);
 router.get('/protected', authMiddleware, userController.protectedRoute);
 
 module.exports = router;

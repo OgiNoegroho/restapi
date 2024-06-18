@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
 
 const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
 const dosenRoutes = require('./routes/dosenRoutes');
@@ -10,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
+app.use(helmet());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -23,6 +25,12 @@ app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to the API!' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something broke!' });
 });
 
 app.use((req, res, next) => {

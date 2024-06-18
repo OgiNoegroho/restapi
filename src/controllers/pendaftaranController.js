@@ -10,7 +10,9 @@ exports.getMahasiswaP = (req, res) => {
       m.Email AS email, 
       p.Judul_TA AS judul, 
       d1.Nama AS calonPembimbing1, 
-      d2.Nama AS calonPembimbing2, 
+      d2.Nama AS calonPembimbing2,
+      COALESCE(d3.Nama, 'Belum ada') AS Penguji1,
+      COALESCE(d4.Nama, 'Belum ada') AS Penguji2,
       NULL AS berkas, 
       NULL AS catatan, 
       p.status AS status,
@@ -23,6 +25,10 @@ exports.getMahasiswaP = (req, res) => {
       Dosen d1 ON p.nip_pembimbing1 = d1.NIP
     JOIN 
       Dosen d2 ON p.nip_pembimbing2 = d2.NIP
+    LEFT JOIN 
+      Dosen d3 ON p.nip_penguji1 = d3.NIP
+    LEFT JOIN 
+      Dosen d4 ON p.nip_penguji2 = d4.NIP
     WHERE
       p.NIM = ?;
   `;
@@ -30,18 +36,19 @@ exports.getMahasiswaP = (req, res) => {
   database.query(sqlQuery, [nim], (err, result) => {
     if (err) {
       console.error('Error fetching mahasiswa details:', err);
-      res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    
+    if (result.length > 0) {
+      // Format the date in YYYY-MM-DD format
+      result[0].tanggal = new Date(result[0].tanggal).toISOString().split('T')[0];
+      return res.json(result[0]);
     } else {
-      if (result.length > 0) {
-        // Format the date
-        result[0].tanggal = new Date(result[0].tanggal).toISOString().split('T')[0];
-        res.json(result[0]);
-      } else {
-        res.status(404).json({ error: 'Mahasiswa not found' });
-      }
+      return res.status(404).json({ error: 'Mahasiswa not found' });
     }
   });
 };
+
 
 
 exports.getAllMahasiswaP = (req, res) => {

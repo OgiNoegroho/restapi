@@ -23,7 +23,7 @@ const User = {
                 result(null, res[0]);
                 return;
             }
-            result({ kind: "not_found" }, null);
+            result({ kind: "not found" }, null);
         });
     },
 
@@ -43,39 +43,8 @@ const User = {
         );
     },
 
-    createProfilePic: (profilePic, result) => {
-        const { user_id, profile_pic } = profilePic;
-        db.query(
-            "INSERT INTO profile_pics SET user_id = ?, profile_pic = ?",
-            [user_id, profile_pic],
-            (err, res) => {
-                if (err) {
-                    console.log("error: ", err);
-                    result(err, null);
-                    return;
-                }
-                result(null, { id: res.insertId, ...profilePic });
-            }
-        );
-    },
-
     findProfileByUserId: (userId, result) => {
         db.query("SELECT * FROM user_profiles WHERE user_id = ?", [userId], (err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                result(err, null);
-                return;
-            }
-            if (res.length) {
-                result(null, res[0]);
-                return;
-            }
-            result({ kind: "not_found" }, null);
-        });
-    },
-
-    findProfilePicByUserId: (userId, result) => {
-        db.query("SELECT * FROM profile_pics WHERE user_id = ?", [userId], (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -105,25 +74,6 @@ const User = {
                     return;
                 }
                 result(null, { user_id: userId, ...profile });
-            }
-        );
-    },
-
-    updateProfilePicture: (userId, profile_pic, result) => {
-        db.query(
-            "UPDATE profile_pics SET profile_pic = ? WHERE user_id = ?",
-            [profile_pic, userId],
-            (err, res) => {
-                if (err) {
-                    console.log("error: ", err);
-                    result(err, null);
-                    return;
-                }
-                if (res.affectedRows == 0) {
-                    result({ kind: "not_found" }, null);
-                    return;
-                }
-                result(null, { user_id: userId, profile_pic });
             }
         );
     }

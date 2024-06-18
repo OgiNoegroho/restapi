@@ -7,64 +7,70 @@ if (!JWT_SECRET) {
   throw new Error("Missing JWT_SECRET environment variable");
 }
 
-exports.register = (req, res) => {
-  const { email, password, name, nip, age, birthplace, birthdate, address, gender } = req.body;
+exports.register = async (req, res) => {
+  try {
+    const { email, password, name, nip, age, birthplace, birthdate, address, gender } = req.body;
 
-  User.findByEmail(email, (err, existingUser) => {
-    if (err && err.kind !== "not_found") {
-      console.error("Error checking email:", err);
-      return res.status(500).send({ success: false, message: "Error checking email." });
-    }
+    // Check if the email already exists
+    const existingUser = await new Promise((resolve, reject) => {
+      User.findByEmail(email, (err, user) => {
+        if (err && err.kind !== "not_found") return reject(err);
+        resolve(user);
+      });
+    });
 
     if (existingUser) {
       return res.status(400).send({ success: false, message: "Email already exists!" });
     }
 
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-      if (err) {
-        console.error("Error hashing password:", err);
-        return res.status(500).send({ success: false, message: "Error hashing password." });
-      }
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      const newUser = {
-        email: email,
-        password: hashedPassword
-      };
+    const newUser = {
+      email,
+      password: hashedPassword
+    };
 
-      User.create(newUser, (err, userData) => {
-        if (err) {
-          console.error("Error registering user:", err);
-          return res.status(500).send({ success: false, message: "Error registering user." });
-        }
-
-        const newProfile = {
-          user_id: userData.id,
-          name,
-          nip,
-          age,
-          birthplace,
-          birthdate,
-          address,
-          gender
-        };
-
-        User.createProfile(newProfile, (err, profileData) => {
-          if (err) {
-            console.error("Error creating profile:", err);
-            return res.status(500).send({ success: false, message: "Error creating profile." });
-          }
-
-          res.status(201).send({
-            success: true,
-            message: "User registered successfully!",
-            user: userData,
-            profile: profileData
-          });
-        });
+    // Create new user
+    const userData = await new Promise((resolve, reject) => {
+      User.create(newUser, (err, user) => {
+        if (err) return reject(err);
+        resolve(user);
       });
     });
-  });
+
+    const newProfile = {
+      user_id: userData.id,
+      name,
+      nip,
+      age,
+      birthplace,
+      birthdate,
+      address,
+      gender
+    };
+
+    // Create new profile
+    const profileData = await new Promise((resolve, reject) => {
+      User.createProfile(newProfile, (err, profile) => {
+        if (err) return reject(err);
+        resolve(profile);
+      });
+    });
+
+    res.status(201).send({
+      success: true,
+      message: "User registered successfully!",
+      user: userData,
+      profile: profileData
+    });
+
+  } catch (err) {
+    console.error("Error registering user:", err.message);
+    res.status(500).send({ success: false, message: "Error registering user.", error: err.message });
+  }
 };
+
 
 exports.login = (req, res) => {
   const { email, password } = req.body;

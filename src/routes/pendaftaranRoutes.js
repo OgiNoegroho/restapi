@@ -8,5 +8,6 @@ router.get('/pendaftaran', authMiddleware, pendaftaranController.getAllMahasiswa
 router.post('/pendaftaran', authMiddleware, pendaftaranController.addPendaftaran);
 router.put('/pendaftaran/:nim/status', authMiddleware, pendaftaranController.updateMahasiswaPStatus);
 router.post('/pendaftaran/:nim', authMiddleware, pendaftaranController.updatePenguji);
+router.delete('/pendaftaran/:nim', authMiddleware, pendaftaranController.deleteMahasiswaP);
 
 module.exports = router;

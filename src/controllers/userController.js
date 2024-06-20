@@ -7,6 +7,60 @@ if (!JWT_SECRET) {
   throw new Error("Missing JWT_SECRET environment variable");
 }
 
+exports.requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the email exists
+    const user = await new Promise((resolve, reject) => {
+      User.findByEmail(email, (err, user) => {
+        if (err && err.kind !== "not_found") return reject(err);
+        resolve(user);
+      });
+    });
+
+    if (!user) {
+      return res.status(404).send({ success: false, message: "Email not found!" });
+    }
+
+    // Generate a token
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+
+    // For demonstration purposes, return the token directly in the response
+    res.status(200).send({ success: true, token });
+
+  } catch (err) {
+    console.error("Error requesting password reset:", err.message);
+    res.status(500).send({ success: false, message: "Error requesting password reset.", error: err.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    await new Promise((resolve, reject) => {
+      User.updatePassword(decoded.id, hashedPassword, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    res.status(200).send({ success: true, message: "Password reset successfully!" });
+
+  } catch (err) {
+    console.error("Error resetting password:", err.message);
+    res.status(500).send({ success: false, message: "Error resetting password.", error: err.message });
+  }
+};
+
 exports.register = async (req, res) => {
   try {
     const { email, password, name, nip, age, birthplace, birthdate, address, gender } = req.body;

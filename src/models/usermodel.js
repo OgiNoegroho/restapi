@@ -76,6 +76,25 @@ const User = {
         result(null, { user_id: userId, ...profile });
       }
     );
+  },
+
+  updatePassword: (userId, password, result) => {
+    db.query(
+      "UPDATE users SET password = ? WHERE id = ?",
+      [password, userId],
+      (err, res) => {
+        if (err) {
+          console.log("Error in updatePassword:", err);
+          result(err, null);
+          return;
+        }
+        if (res.affectedRows == 0) {
+          result({ kind: "not_found" }, null);
+          return;
+        }
+        result(null, { id: userId });
+      }
+    );
   }
 };
 

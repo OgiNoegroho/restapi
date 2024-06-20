@@ -49,8 +49,6 @@ exports.getMahasiswaP = (req, res) => {
   });
 };
 
-
-
 exports.getAllMahasiswaP = (req, res) => {
   const sqlQuery = `
     SELECT 
@@ -88,8 +86,6 @@ exports.getAllMahasiswaP = (req, res) => {
     }
   });
 };
-
-
 
 exports.updateMahasiswaPStatus = (req, res) => {
   const nim = req.params.nim;
@@ -182,8 +178,6 @@ exports.addPendaftaran = (req, res) => {
   });
 };
 
-
-
 exports.updatePenguji = (req, res) => {
   const nim = req.params.nim;
   const { nip_penguji1, nip_penguji2 } = req.body;
@@ -209,6 +203,28 @@ exports.updatePenguji = (req, res) => {
     }
     if (result.affectedRows > 0) {
       res.json({ message: 'Penguji updated successfully' });
+    } else {
+      res.status(404).json({ error: 'Mahasiswa not found' });
+    }
+  });
+};
+
+exports.deleteMahasiswaP = (req, res) => {
+  const nim = req.params.nim;
+
+  const sqlQuery = `
+    DELETE FROM Pendaftaran
+    WHERE NIM = ?;
+  `;
+
+  database.query(sqlQuery, [nim], (err, result) => {
+    if (err) {
+      console.error('Error deleting mahasiswa:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    
+    if (result.affectedRows > 0) {
+      res.json({ message: 'Mahasiswa deleted successfully' });
     } else {
       res.status(404).json({ error: 'Mahasiswa not found' });
     }
